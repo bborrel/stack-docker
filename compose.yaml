@@ -1,0 +1,54 @@
+services:
+  httpd:
+    image: httpd:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./html:/var/www/html
+      - ./docker/ssl/server.crt:/usr/local/apache2/conf/server.crt
+      - ./docker/ssl/server.key:/usr/local/apache2/conf/server.key
+      - ./docker/httpd/httpd.conf:/usr/local/apache2/conf/httpd.conf
+      - ./docker/httpd/httpd-vhosts.conf:/usr/local/apache2/conf/extra/httpd-vhosts.conf
+    depends_on:
+      - certs
+      - php
+
+  certs:
+    image: alpine:latest
+    volumes:
+      - ./docker/ssl:/ssl
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - >
+        apk add --no-cache openssl &&
+        mkdir -p /ssl &&
+        openssl req -x509 -nodes -days 365 -newkey rsa:2048
+        -keyout /ssl/server.key -out /ssl/server.crt
+        -subj "/C=CA/ST=Quebec/L=Montreal/O=Boumzi/OU=IT/CN=localhost"
+
+  php:
+    build:
+      context: .
+      dockerfile: ./docker/php/Dockerfile
+    volumes:
+      - ./html:/var/www/html
+      - ./docker/php/php.ini:/usr/local/etc/php/php.ini
+    depends_on:
+      - mysql
+
+  mysql:
+    image: mysql:9
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: drupal
+      MYSQL_USER: drupal
+      MYSQL_PASSWORD: drupal
+    volumes:
+      - db-data:/var/lib/mysql
+
+volumes:
+  db-data:
