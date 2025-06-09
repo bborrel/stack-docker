@@ -1,1 +1,3 @@
+docker/ssl/server.crt
+docker/ssl/server.key
 html/
