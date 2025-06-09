@@ -37,6 +37,18 @@ services:
     depends_on:
       - mysql
 
+  node:
+    image: node:22
+    user: node
+    working_dir: /home/node/app
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - ./app:/home/node/app
+    ports:
+      - "3000:3000"
+    command: "npm start"
+
   mysql:
     image: mysql:9
     restart: always
