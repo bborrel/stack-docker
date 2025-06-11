@@ -33,9 +33,10 @@ RUN apt-get install -y --no-install-recommends \
 #    && docker-php-ext-enable redis xdebug
 RUN pecl channel-update pecl.php.net \
     && pecl install apcu-5.1.24 \
+    && pecl install redis \
     && pecl install uploadprogress-2.0.2 \
     && pecl install xdebug-3.4.1 \
-    && docker-php-ext-enable apcu uploadprogress xdebug
+    && docker-php-ext-enable apcu redis uploadprogress xdebug
 
 COPY ./docker/php/xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 
